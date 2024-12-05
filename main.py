@@ -1,4 +1,4 @@
-import algo_DH
+from diffieHellman import *
 import time
 
 def main():
@@ -6,27 +6,27 @@ def main():
 
     start_time = time.time()
 
-    prime_size = algo_DH.get_prime_size()
-    prime = algo_DH.generate_large_prime(prime_size)
+    prime_size = get_prime_size()
+    prime = generate_large_prime(prime_size)
     print(f"\n✔ Generated prime number ({prime_size} bits): {prime}")
 
-    base = algo_DH.choose_base_for_prime(prime)
+    base = choose_base_for_prime(prime)
     if base:
         print(f"✔ The base {base} was found as a primitive root for the prime number {prime}.")
 
         # Alice's keys
-        alice_private_key = algo_DH.generate_private_key(prime)
-        alice_public_key = algo_DH.generate_public_key(prime, base, alice_private_key)
+        alice_private_key = generate_private_key(prime)
+        alice_public_key = generate_public_key(prime, base, alice_private_key)
         print(f"🔑 Alice's Public Key: {alice_public_key}")
 
         # Bob's keys
-        bob_private_key = algo_DH.generate_private_key(prime)
-        bob_public_key = algo_DH.generate_public_key(prime, base, bob_private_key)
+        bob_private_key = generate_private_key(prime)
+        bob_public_key = generate_public_key(prime, base, bob_private_key)
         print(f"🔑 Bob's Public Key: {bob_public_key}")
 
         # Shared secret
-        alice_shared_secret = algo_DH.generate_shared_secret(prime, bob_public_key, alice_private_key)
-        bob_shared_secret = algo_DH.generate_shared_secret(prime, alice_public_key, bob_private_key)
+        alice_shared_secret = generate_shared_secret(prime, bob_public_key, alice_private_key)
+        bob_shared_secret = generate_shared_secret(prime, alice_public_key, bob_private_key)
 
         print(f"🤝 Alice's Shared Secret: {alice_shared_secret}")
         print(f"🤝 Bob's Shared Secret: {bob_shared_secret}")

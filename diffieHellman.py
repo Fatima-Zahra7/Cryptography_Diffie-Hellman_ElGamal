@@ -4,7 +4,6 @@ import random
 ### Diffie-Hellman Key Exchange Algorithm
 
 #### Steps: Generate Prime number of 1024 bits max
-
 def get_prime_size():
     while True:
         try:
@@ -66,6 +65,7 @@ def generate_large_prime(bits):
 def is_primitive_root(base, prime):
     if gcd(base, prime) != 1:
         return False  # La base doit être coprime avec prime
+
     # Calculer les facteurs de (prime - 1)
     phi = prime - 1
     factors = set()
@@ -76,8 +76,10 @@ def is_primitive_root(base, prime):
             factors.add(i)
             n //= i
         i += 1
+
     if n > 1:
         factors.add(n)
+
     # Vérifier que base^(phi/f) != 1 (mod prime) pour tous les facteurs f
     for factor in factors:
         if pow(base, phi // factor, prime) == 1:

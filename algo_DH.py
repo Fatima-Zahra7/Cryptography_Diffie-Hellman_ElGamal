@@ -1,43 +1,110 @@
-import random
 from math import sqrt
+from math import gcd
+import random
 
 ### Diffie-Hellman Key Exchange Algorithm
 
-#### Steps: Generate Prime number
-def is_prime(n):
+#### Steps: Generate Prime number of 1024 bits max
+
+def get_prime_size():
+    while True:
+        try:
+            size = int(input("Enter the size of the prime number (in bits, max 1024 bits): "))
+            if size < 2 or size > 1024:
+                print("Please enter a size between 2 and 1024 bits.")
+            else:
+                return size
+        except ValueError:
+            print("Invalid input, please enter a valid integer.")
+
+def is_prime_miller_rabin(n, k=5):
     if n <= 1:
         return False
-    for i in range(2, int(sqrt(n)) + 1):
-        if n % i == 0:
+    if n <= 3:
+        return True
+    if n % 2 == 0:
+        return False
+
+    # Décompose n - 1 en 2^r * d
+    def miller_test(d, n):
+        # Choisir un témoin aléatoire a dans [2, n-2]
+        a = random.randint(2, n - 2)
+        x = pow(a, d, n)  # Calcul rapide : a^d % n
+        if x == 1 or x == n - 1:
+            return True
+
+        while d != n - 1:
+            x = (x * x) % n
+            d *= 2
+            if x == 1:
+                return False
+            if x == n - 1:
+                return True
+        return False
+
+    d = n - 1
+    while d % 2 == 0:
+        d //= 2
+
+    # Effectuer k tests indépendants
+    for _ in range(k):
+        if not miller_test(d, n):
             return False
     return True
 
-def generate_large_prime():
+def generate_large_prime(bits):
+    if bits < 2:
+        raise ValueError("The number of bits must be greater than or equal to 2.")
     while True:
-        prime = random.randint(10**9, 10**10)  # Choisir un nombre assez grand
-        if is_prime(prime):
-            return prime
+        prime_candidate = random.getrandbits(bits)
+        prime_candidate |= (1 << bits - 1) | 1
+        if is_prime_miller_rabin(prime_candidate):
+            return prime_candidate
 
 ############################################################################################
 #### Steps: Check if base is a primitive root
+
 def is_primitive_root(base, prime):
-    """Vérifie si la base est une racine primitive modulo prime."""
-    powers = set()
-    for i in range(1, prime):
-        powers.add(pow(base, i, prime))
-    return len(powers) == prime - 1  # Une racine primitive génère tous les entiers de 1 à prime-1
+    if gcd(base, prime) != 1:
+        return False  # La base doit être coprime avec prime
+    # Calculer les facteurs de (prime - 1)
+    phi = prime - 1
+    factors = set()
+    n = phi
+    i = 2
+    while i * i <= n:
+        while n % i == 0:
+            factors.add(i)
+            n //= i
+        i += 1
+    if n > 1:
+        factors.add(n)
+    # Vérifier que base^(phi/f) != 1 (mod prime) pour tous les facteurs f
+    for factor in factors:
+        if pow(base, phi // factor, prime) == 1:
+            return False
+    return True
 
 def choose_base_for_prime(prime):
-    """Choisit une base vérifiée comme racine primitive pour le nombre premier."""
-    for base in [2, 3, 5]:
+    if prime < 2:
+        raise ValueError("Le nombre doit être un nombre premier supérieur ou égal à 2.")
+
+    # Bases prédéfinies à tester en premier
+    predefined_bases = [2, 3, 5, 7, 11, 13]
+    attempts = predefined_bases + [random.randint(2, prime - 1) for _ in range(100)]
+
+    for base in attempts:
         if is_primitive_root(base, prime):
             return base
-    return None  # Si aucune base vérifiée n'est trouvée
+
+    # Si aucune base n'est trouvée après tous les essais
+    return None
 
 ############################################################################################
 #### Steps: Generate key
 def generate_private_key(prime):
-    return random.randint(2, prime - 2)
+    secure_random = random.SystemRandom()
+    return secure_random.randint(2, prime - 2)
 
 def generate_public_key(prime, base, private_key):
     return pow(base, private_key, prime)
@@ -49,29 +116,39 @@ def generate_shared_secret(prime, public_key, private_key):
 
 ############################################################################################
 #### Main
+def main():
+    print("=== Diffie-Hellman Key Exchange ===")
+    prime_size = get_prime_size()
+    prime = generate_large_prime(prime_size)
+    print(f"\n✔ Generated prime number ({prime_size} bits): {prime}")
+
+    base = choose_base_for_prime(prime)
+    if base:
+        print(f"✔ The base {base} was found as a primitive root for the prime number {prime}.")
+
+        # Alice's keys
+        alice_private_key = generate_private_key(prime)
+        alice_public_key = generate_public_key(prime, base, alice_private_key)
+        print(f"🔑 Alice's Public Key: {alice_public_key}")
+
+        # Bob's keys
+        bob_private_key = generate_private_key(prime)
+        bob_public_key = generate_public_key(prime, base, bob_private_key)
+        print(f"🔑 Bob's Public Key: {bob_public_key}")
+
+        # Shared secret
+        alice_shared_secret = generate_shared_secret(prime, bob_public_key, alice_private_key)
+        bob_shared_secret = generate_shared_secret(prime, alice_public_key, bob_private_key)
+
+        print(f"🤝 Alice's Shared Secret: {alice_shared_secret}")
+        print(f"🤝 Bob's Shared Secret: {bob_shared_secret}")
+
+        if alice_shared_secret == bob_shared_secret:
+            print("✔ Key exchange successful!")
+        else:
+            print("❌ Key exchange failed. Shared secrets do not match.")
+    else:
+        print(f"❌ No primitive root found for the prime number {prime}.\nPlease try again.")
+
 if __name__ == "__main__":
-    # Générer un nombre premier large et valide
-    prime = generate_large_prime()
-    base = choose_base_for_prime(prime)  # Exemple de base, qui devrait être une racine primitive dans un contexte réel
-
-    print(f"Prime number is: {prime}")
-    print(f"Base is: {base}")
-
-    # Alice génère ses clés privées et publiques
-    alice_private_key = generate_private_key(prime)
-    alice_public_key = generate_public_key(prime, base, alice_private_key)
-    print(f"Alice's Public Key: {alice_public_key}")
-
-    # Bob génère ses clés privées et publiques
-    bob_private_key = generate_private_key(prime)
-    bob_public_key = generate_public_key(prime, base, bob_private_key)
-    print(f"Bob's Public Key: {bob_public_key}")
-
-    # Alice et Bob génèrent le secret partagé
-    alice_shared_secret = generate_shared_secret(prime, bob_public_key, alice_private_key)
-    bob_shared_secret = generate_shared_secret(prime, alice_public_key, bob_private_key)
-
-    print(f"Alice's Shared Secret: {alice_shared_secret}")
-    print(f"Bob's Shared Secret: {bob_shared_secret}")
-    assert alice_shared_secret == bob_shared_secret, "Shared secrets do not match!"
-    print("Key exchange successful!")
+    main()

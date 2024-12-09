@@ -41,6 +41,24 @@ def generate_large_prime(bits):
             return num
 
 
+def ask_len_prime():
+    options = {1: 128, 2: 256, 3: 512, 4: 1024}
+    while True:
+        try:
+            print("Select the number of bits to generate your keys:")
+            for key, value in options.items():
+                max_message_length = value // 8 - 1  # Calculer la longueur max en octets
+                print(f"{key}. {value} bits (max message length: {max_message_length} characters)")
+            choice = int(input("Enter your choice (1-3): "))
+
+            if choice in options:
+                return options[choice]
+            else:
+                print("Invalid choice. Please select a valid option (1-3).")
+        except ValueError:
+            print("Invalid input. Please enter a number (1-3).")
+
+
 # 1.2 Get generator
 def get_generator(p: int):
     for g in range(2, p):  # Teste les petites valeurs
@@ -117,10 +135,8 @@ def mod_inverse(a: int, m: int):
 
 
 # 4. Generate keys
-def generate_keys(bits=128):
-    p = generate_large_prime(bits)
-    print(p)
-
+def generate_keys(bits: int):
+    p = generate_large_prime(bits)  # prime
     g = get_generator(p)  # generator
     x = secrets.randbelow(p - 1)  # private key
     h = pow(g, x, p)  # public key
@@ -140,21 +156,63 @@ def int_to_text(number):
 
 
 # 6. Main
-def main():
-    public_key, private_key = generate_keys()
+def encrypt_message(public_key):
     p, g, h = public_key
+    message = input("Enter a message to encrypt: ")
+    print(f"Original message: {message}")
+    try:
+        c1, c2 = encrypt(p, g, h, message)
+        print("Encrypted message:")
+        print(f"c1 = {c1}")
+        print(f"c2 = {c2}")
+        return c1, c2
+    except ValueError as e:
+        print(f"Encryption error: {e}")
+        return None, None
 
-    print("Public key:", public_key)
-    print("Private key:", private_key)
 
-    message = input("Enter a message you want to encrypt: ")
-    print(f"Message original: {message}")
+def decrypt_message(private_key):
+    p, x = private_key
+    try:
+        c1 = int(input("Enter c1: "))
+        c2 = int(input("Enter c2: "))
+        decrypted_message = decrypt(p, x, c1, c2)
+        print(f"Decrypted message: {decrypted_message}")
+    except ValueError as e:
+        print(f"Decryption error: {e}")
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
 
-    c1, c2 = encrypt(p, g, h, message)
-    print("Message chiffré (c1, c2):", c1, c2)
 
-    decrypted_message = decrypt(*private_key, c1, c2)
-    print("Message déchiffré:", decrypted_message)
+def main():
+    print("Welcome to the ElGamal Cryptography System.")
+
+    # Step 1: Generate keys
+    bits = ask_len_prime()
+    public_key, private_key = generate_keys(bits)
+    print("\nKeys have been successfully generated!")
+    print(f"Public key: {public_key}")
+    print(f"Private key: {private_key}")
+
+    while True:
+        print("\nWhat would you like to do?")
+        print("1. Encrypt a message")
+        print("2. Decrypt a message")
+        print("3. Exit")
+
+        try:
+            choice = int(input("Enter your choice (1, 2, or 3): "))
+            if choice == 1:
+                encrypt_message(public_key)
+            elif choice == 2:
+                decrypt_message(private_key)
+            elif choice == 3:
+                print("Thank you for using the ElGamal Cryptography System. Goodbye!")
+                break
+            else:
+                print("Invalid choice. Please select 1, 2, or 3.")
+        except ValueError:
+            print("Invalid input. Please enter a number.")
 
 
 if __name__ == "__main__":

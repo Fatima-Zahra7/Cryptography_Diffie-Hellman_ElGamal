@@ -185,7 +185,7 @@ def decrypt_message(private_key):
 
 
 def main():
-    print("Welcome to the ElGamal Cryptography System.")
+    print("El Gamal Cryptography System.")
 
     # Step 1: Generate keys
     bits = ask_len_prime()

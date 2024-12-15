@@ -1,4 +1,3 @@
-# main.py
 import elGamal
 import diffieHellman
 

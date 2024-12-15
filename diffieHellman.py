@@ -8,7 +8,7 @@ import time
 
 # Steps: Generate Prime number of 1024 bits max
 def ask_len_prime():
-    options = {1: 128, 2: 256, 3: 512, 4: 1024}
+    options = {1: 16, 2: 32, 3: 64, 4: 128}
     while True:
         try:
             print("Select the number of bits to generate your keys:")

@@ -49,14 +49,14 @@ def ask_len_prime():
             for key, value in options.items():
                 max_message_length = value // 8 - 1  # Calculer la longueur max en octets
                 print(f"{key}. {value} bits (max message length: {max_message_length} characters)")
-            choice = int(input("Enter your choice (1-3): "))
+            choice = int(input("Enter your choice (1-4): "))
 
             if choice in options:
                 return options[choice]
             else:
-                print("Invalid choice. Please select a valid option (1-3).")
+                print("Invalid choice. Please select a valid option (1-4).")
         except ValueError:
-            print("Invalid input. Please enter a number (1-3).")
+            print("Invalid input. Please enter a number (1-4).")
 
 
 # 1.2 Get generator

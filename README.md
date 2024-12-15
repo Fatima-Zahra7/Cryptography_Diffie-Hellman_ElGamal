@@ -15,12 +15,12 @@ In the **Diffie-Hellman Key Exchange**, two parties can securely exchange crypto
 3. **Generate public keys**: Each party computes a public key by raising the base (`g`) to the power of their private key, modulo the prime number (`p`). This public key is then shared with the other party.
 
 4. **Compute the shared secret**: Each party takes the other party's public key and raises it to the power of their own private key, modulo `p`. This results in a shared secret that is the same for both parties, even though the key was never directly exchanged.
-
+[]()
 The **Diffie-Hellman Key Exchange** algorithm enables secure communication without the need to transmit sensitive information, thus reducing the risk of interception by unauthorized parties.
 
 ### Implementation in this project:
 - The implementation uses the **Miller-Rabin primality test** for generating large prime numbers.
-- It allows users to select the key size (128, 256, 512, or 1024 bits) and generates the required prime numbers and public keys.
+- It allows users to select the key size (16, 32, 64 or 128 bits) and generates the required prime numbers and public keys.
 - The private keys are securely generated, and the shared secret is computed for both parties (e.g., Alice and Bob), ensuring that both derive the same secret key for encryption.
 
 ---
@@ -51,7 +51,7 @@ ElGamal encryption provides semantic security, meaning that even if an attacker 
 
 ## Project Features:
 - **Key Exchange and Encryption**: This project demonstrates both the Diffie-Hellman key exchange and ElGamal encryption systems, offering a comprehensive approach to understanding how these algorithms work together.
-- **Key Size Selection**: You can choose the key size (128, 256, 512, or 1024 bits) to determine the strength of the cryptographic operations.
+- **Key Size Selection**: You can choose the key size (from 16 to 1024 bits) to determine the strength of the cryptographic operations.
 - **Real-time Computation**: The project calculates the prime numbers, public keys, and shared secrets in real-time, making the learning process interactive.
 
 ## Conclusion:
